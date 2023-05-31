@@ -1,23 +1,85 @@
 package datos;
 
-public abstract class Usuario  {
-	
-		private String nombre;
-		private String apellido;
-		private String dni;
-		private String email;
-		private String clave;
-		private boolean login;
-	
-	public Usuario(String nombre, String apellido, String dni, String email, String clave, boolean login) {
-			super();
-			this.nombre = nombre;
-			this.apellido = apellido;
-			this.dni = dni;
-			this.email = email;
-			this.clave = clave;
-			this.login = login;
-		}
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.LinkedList;
+
+import javax.swing.JOptionPane;
+
+import interfaces.Conexion;
+
+public class Usuario {
+
+	private String nombre;
+	private String apellido;
+	private String dni;
+	private String email;
+	private String telefono;
+	private String clave;
+	private int puesto = 0;
+	private int sucursal = 0;
+	String id;
+	private boolean login;
+
+	Conexion con = new Conexion();
+	Connection conexion = con.conectar();
+
+	PreparedStatement stmt;
+
+	// constructor para crear un nuevo usuario
+	public Usuario(String nombre, String apellido, String dni, String email, String tel, String clave, int p, int s) {
+		super();
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.dni = dni;
+		this.email = email;
+		this.telefono = tel;
+		this.clave = clave;
+		this.puesto = p;
+		this.sucursal = s;
+
+	}
+
+	// constructor para traer los datos de la BDD
+	public Usuario(String id, String nombre, String apellido, String dni, String email, String tel, int p, int s,
+			String clave) {
+		super();
+		this.id = id;
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.dni = dni;
+		this.email = email;
+		this.telefono = tel;
+		this.clave = clave;
+		this.puesto = p;
+		this.sucursal = s;
+
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public int getPuesto() {
+		return puesto;
+	}
+
+	public void setPuesto(int puesto) {
+		this.puesto = puesto;
+	}
+
+	public int getSucursal() {
+		return sucursal;
+	}
+
+	public void setSucursal(int sucursal) {
+		this.sucursal = sucursal;
+	}
 
 	public String getNombre() {
 		return nombre;
@@ -26,7 +88,7 @@ public abstract class Usuario  {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	
+
 	public String getApellido() {
 		return apellido;
 	}
@@ -67,30 +129,37 @@ public abstract class Usuario  {
 		this.login = login;
 	}
 
-	
-	public String getclave() {
-		return clave;
+	public String getTelefono() {
+		return telefono;
 	}
 
-	public void setclave(String clave) {
-		this.clave = clave;
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
 	}
-
 
 	@Override
 	public String toString() {
-		return "Usuario [nombre=" + nombre + ", apellido=" + apellido + ", dni=" + dni + ", email=" + email
-				+ ", clave=" + clave + ", login=" + login + "]";
+		return "Usuario:   id: " + id + ", nombre: " + nombre + ", apellido: " + apellido + ", dni: " + dni
+				+ ", email: " + email + "Telefono: " + telefono + ", clave: " + clave + ", puesto: " + puesto
+				+ ", sucursal: " + sucursal + "\n";
 	}
-	
-	
 
-	public boolean login() {
-		return true;
+	public boolean login(String dni, String clave) {
+
+		//Comparo dni y clave en la linkedList para iniciar sesion
+		if (dni.equals(this.getDni())) {
+			if (clave.equals(this.getClave()) ) {
+				System.out.println("Usuario "+this.nombre+" "+this.apellido +
+						" Ingreso correctamente.");
+				return true;
+			} else {
+				return false;
+			}
+		}else {
+			return false;
+		}
 	}
-	
-	public void logOut() {
-		setLogin(false);
-	}
-	
+
+		
+
 }

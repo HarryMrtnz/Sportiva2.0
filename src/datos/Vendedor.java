@@ -1,17 +1,28 @@
 package datos;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.LinkedList;
+
+import javax.swing.JOptionPane;
+
+import interfaces.Conexion;
+
+
 public class Vendedor extends Usuario {
 	
 	private int id_vendedor;
-	private Sucursal sucursal;
 	
-	public Vendedor(String nombre, String apellido, String dni, String email, String clave, boolean login,
-			int id_vendedor, Sucursal sucursal) {
-		super(nombre, apellido, dni, email, clave, login);
-		this.id_vendedor = id_vendedor;
-		this.sucursal = sucursal;
+
+	Conexion con = new Conexion();
+	Connection conexion = con.conectar();
+	PreparedStatement stmt;
+		
+	public Vendedor(String nombre, String apellido, String dni, String email, String tel, String clave, int p, int s) {
+		super(nombre, apellido, dni, email, tel, clave, p, s);
 	}
-	
+
 	public int getId_vendedor() {
 		return id_vendedor;
 	}
@@ -19,34 +30,41 @@ public class Vendedor extends Usuario {
 	public void setId_vendedor(int id_vendedor) {
 		this.id_vendedor = id_vendedor;
 	}
-
-	public Sucursal getSucursal() {
-		return sucursal;
-	}
-
-	public void setSucursal(Sucursal sucursal) {
-		this.sucursal = sucursal;
-	}
 	
 	@Override
 	public String toString() {
-		return "Vendedor [id_vendedor=" + id_vendedor + ", sucursal=" + sucursal + "]";
+		return "Vendedor [id_vendedor=" + id_vendedor + ", con=" + con + ", conexion="
+				+ conexion + ", stmt=" + stmt + "]";
 	}
 
 	
 	
-	public void abrirCaja() {
-
-	}
 	
-	public void realizarVenta() {
+	public boolean realizarVenta() {
+		Venta nuevaVenta = new Venta(0, null, "", 0);
 		
+		nuevaVenta.guardar();
+		return true;
 	}
 	
-	public void revisarStock() {
+	public String verStockProductos() {
+		Producto nuevoProducto = new Producto (0, "", "", "", 0, "");
+		
+		return nuevoProducto.productosPorSucursal();
+	}
+	
+	public String verStock() {
+		Producto nuevoProducto = new Producto (0, "", "", "", 0, "");
+		
+		return nuevoProducto.stockPorProducto();
+	}
+	
+//	public void obtenerId() {
+//		Producto nuevoProducto = new Producto (0, "", "", "", 0, "");
+//		
+//		//return nuevoProducto.obtenerId();
+//	}
 
-	}
-	
 	public void hacerPedido() {
 
 	}
