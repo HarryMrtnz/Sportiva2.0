@@ -124,7 +124,6 @@ public class Main {
 					}
 				} while (idE<=0);
 				
-	
 				try {
 					if (ver.verificaUsuario(idE).isEmpty()) {
 						
@@ -132,7 +131,6 @@ public class Main {
 					JOptionPane.showMessageDialog(null, ver.verificaUsuario(idE));
 					}
 				} catch (Exception e) {
-
 					
 				}
 				break;

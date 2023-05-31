@@ -15,11 +15,9 @@ public class Verifica {
 	Vendedor nuevoVendedor = new Vendedor ("", "", "", "", "", "", 0, 0);
 	Producto nuevoProducto = new Producto (0, "", "", "", 0, "");
 	
-	
 //--- Hecho por Fran -----
 	Gerente nuevousuario = new Gerente("","","","","","",0,0); 
 	
-
   	public LinkedList<Usuario> verificaLista(){
 		
 		return nuevousuario.verUsuarios();
@@ -34,9 +32,6 @@ public class Verifica {
 			return null;
 		}
 	} 
-	
-	
- 
   	
   	public boolean verificarEliminar(int id) {
   		if (id>0 && id<9999999) {
@@ -48,57 +43,61 @@ public class Verifica {
 		}
   	}
 	
-	
 	public boolean verificarAgregar(String nombre , String apellido, String dni, String email, String telefono, String clave, int puesto, int sucursal) {
 		int error=0;
 		do {
-			
-	
-		if (nombre.length()>=3 &&  nombre.length()<=15 && nombre.matches("[a-zA-Z]+")){
-			if (apellido.length()>=3 && apellido.length()<=20 && apellido.matches("[a-zA-Z]+")){
-				if (dni.length()==8 && dni.matches("\\d+")){
-					if (email.length()>=8 && email.length()<=50) {
-						if (telefono.length()>=6 && telefono.length()<=14 && telefono.matches("-?\\d+(-\\d+)*")) {
-							if(clave.length()>=5 && clave.length()<=12) {
-								
+			if (nombre.length()>=3 &&  nombre.length()<=15 && nombre.matches("[a-zA-Z]+")){
+				if (apellido.length()>=3 && apellido.length()<=20 && apellido.matches("[a-zA-Z]+")){
+					if (dni.length()==8 && dni.matches("\\d+")){
+						if (email.length()>=8 && email.length()<=50) {
+							if (telefono.length()>=6 && telefono.length()<=14 && telefono.matches("-?\\d+(-\\d+)*")) {
+								if(clave.length()>=5 && clave.length()<=12) {
 									
-					error=1;
-					nuevousuario.setApellido(apellido);
-					nuevousuario.setDni(dni);
-					nuevousuario.setNombre(nombre);
-					nuevousuario.setEmail(email);
-					nuevousuario.setTelefono(telefono);
-					nuevousuario.setClave(clave);
-					nuevousuario.setPuesto(puesto);
-					nuevousuario.setSucursal(sucursal);
-					 return nuevousuario.crearUsuario();
+									error=1;
+									nuevousuario.setApellido(apellido);
+									nuevousuario.setDni(dni);
+									nuevousuario.setNombre(nombre);
+									nuevousuario.setEmail(email);
+									nuevousuario.setTelefono(telefono);
+									nuevousuario.setClave(clave);
+									nuevousuario.setPuesto(puesto);
+									nuevousuario.setSucursal(sucursal);
 									
-									
+									return nuevousuario.crearUsuario();
+													
 								} else{
-									clave=JOptionPane.showInputDialog("Error al ingresar la clave, debe tener entre 5 y 12 caracteres  \n Ingrese la clave de la nueva persona a a�adir");
-							}
+									clave = JOptionPane.showInputDialog("Error al ingresar la clave, "
+											+ "debe tener entre 5 y 12 caracteres\n"
+											+ "Ingrese la clave de la nueva persona a agregar");
+								}
 							} else {
-							telefono=JOptionPane.showInputDialog("Error al ingresar el telefono, debe tener entre 8 y 14 caracteres numericos  \n Ingrese el telefono de la nueva persona a a�adir");
-						}
-						
+								telefono = JOptionPane.showInputDialog("Error al ingresar el telefono, "
+										+ "debe tener entre 8 y 14 caracteres numericos\n"
+										+ "Ingrese el telefono de la nueva persona a agregar");
+							}
 						} else {
-					email=JOptionPane.showInputDialog("Error al ingresar el email, debe tener entre 8 y 50 letras \n Ingrese el email de la nueva persona a a�adir");
-				} 
-					
+							email=JOptionPane.showInputDialog("Error al ingresar el email, "
+									+ "debe tener entre 8 y 50 letras\n"
+									+ "Ingrese el email de la nueva persona a agregar");
+						} 
+					}else {
+						dni = JOptionPane.showInputDialog("Error al ingresar el dni, "
+								+ "debe tener 8 caracteres numericos\n"
+								+ "Ingrese el dni de la nueva persona a agregar");
+					}
 				}else {
-					dni = JOptionPane.showInputDialog("Error al ingresar el dni, debe tener 8 caracteres numericos \n Ingrese el dni de la nueva persona a a�adir");
+					apellido = JOptionPane.showInputDialog("Error al ingresar el apellido, "
+							+ "debe tener entre 3 y 15 letras\n"
+							+ "Ingrese el apellido de la nueva persona a agregar");
 				}
 			}else {
-				apellido = JOptionPane.showInputDialog("Error al ingresar el apellido, debe tener entre 3 y 15 letras \n Ingrese el apellido de la nueva persona a a�adir");
+				 nombre = JOptionPane.showInputDialog("Error al ingresar el nombre, "
+				 		+ "debe tener entre 3 y 15 letras\n"
+				 		+ "Ingrese el nombre de la nueva persona a agregar");
 			}
-		}else {
-			 nombre = JOptionPane.showInputDialog("Error al ingresar el nombre, debe tener entre 3 y 15 letras \n Ingrese el nombre de la nueva persona a a�adir");
-		}
-		}while(error==0);
+		}while(error == 0);
 		return false;
-		
 	}
-	
 	
 	public boolean verificaEditar(int id) {
 		if (id>0) {
@@ -107,7 +106,6 @@ public class Verifica {
 		} else {
 			JOptionPane.showMessageDialog(null, "Error al ingresar el ID");
 			return false;
-
 		}
 	}
 	
@@ -117,7 +115,6 @@ public class Verifica {
 		
 		return nuevoVendedor.verStockProductos();
 	}
-	
 	
 	public String stockPorProducto() {
 		
