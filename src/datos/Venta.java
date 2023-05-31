@@ -105,7 +105,7 @@ public class Venta {
 		String sql1 ="INSERT INTO detalle_venta(fk_producto, cantidad, fk_venta) "
 				+ "VALUES (?,?,?);";
 		String sql2 ="INSERT INTO venta(fecha, fk_caja, total) "
-				+ "VALUES (?,?,?,?)";
+				+ "VALUES (?,?,?,?);";
 		try {
 			stmt = conexion.prepareStatement(sql1);
 			stmt.setLong(1, this.getProducto().getId_producto());
@@ -118,12 +118,12 @@ public class Venta {
 			stmt.setLong(2, this.getCaja().getId_caja());
 			stmt.setDouble(3, this.getTotal());
 			stmt.executeUpdate();
-			
 			return true;
+			
 		}catch(Exception excepcion){
 			System.out.println(excepcion.getMessage());
 			return false;
-		}
+		}		
 	}
 
 

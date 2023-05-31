@@ -93,7 +93,9 @@ public class Main {
 	
 	//Menu que debe aparecer si el usuario es Gerente
 	public static void menuGerente(LinkedList<Usuario> usuarios) {
-		String[] opciones = { " Visualizar usuarios",
+		Verifica ver = new Verifica();
+		
+		String[] opciones = { " Visualizar usuario",
 							  " Agregar usuario",
 							  " Mostrar lista usuarios",
 							  " Eliminar usuario",
@@ -102,6 +104,9 @@ public class Main {
 							  " Ver equipos clasificados",
 							  " Ver equipos pendientes",
 							  " Salir" };
+		
+		String[] opcionesP = {"1", "2", "3"};
+		String[] opcionesS = {"1", "2", "3"};
 		String opcion="";
 		
 		do {
@@ -109,20 +114,100 @@ public class Main {
 					"SPORTIVA - MENU GERENTE",JOptionPane.DEFAULT_OPTION,null, opciones,opciones[0]);
 			
 			switch (opcion) {
-			case " Visualizar usuarios":
+			case " Visualizar usuario":
+				int idE=0;
+				do {
+					try {
+						idE= Integer.parseInt(JOptionPane.showInputDialog("Ingrese el id del empleado a traer"));
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "Debe ingresar un numero");
+					}
+				} while (idE<=0);
 				
+	
+				try {
+					if (ver.verificaUsuario(idE).isEmpty()) {
+						
+					} else {
+					JOptionPane.showMessageDialog(null, ver.verificaUsuario(idE));
+					}
+				} catch (Exception e) {
+
+					
+				}
 				break;
 			case " Agregar usuario":
+					
+					String nombre= JOptionPane.showInputDialog("Ingrese nombre del nuevo usuario");
+					String apellido= JOptionPane.showInputDialog("Ingrese apellido del nuevo usuario");
+					String dni= JOptionPane.showInputDialog("Ingrese dni del nuevo usuario");
+					String email= JOptionPane.showInputDialog("Ingrese email del nuevo usuario");
+					String telefono= JOptionPane.showInputDialog("Ingrese telefono del nuevo usuario");
+					int puesto= Integer.parseInt((String) JOptionPane.showInputDialog(null, "Seleccione el puesto\n1-Gerente\n2-Vendedor\n3-Encargado",
+							"SPORTIVA - MENU GERENTE",JOptionPane.DEFAULT_OPTION,null, opcionesP,opcionesP[0]));
+					int sucursal= Integer.parseInt((String) JOptionPane.showInputDialog(null, "Ingrese la sucursal\n1-Corrientes\n2-Brasil\n3-Gaona",
+							"SPORTIVA - MENU GERENTE",JOptionPane.DEFAULT_OPTION,null, opcionesS,opcionesS[0]));
+					String clave= JOptionPane.showInputDialog("Ingrese clave del nuevo usuario");
+					
+					if (ver.verificarAgregar(nombre, apellido, dni, email, telefono, clave, puesto, sucursal)) {
+						JOptionPane.showMessageDialog(null, "Usuario creado con exito");
+						
+					} else {
+						JOptionPane.showMessageDialog(null, "Error al crear el usuario");
+					}
 				
 				break;
 			case " Mostrar lista usuarios":
 				
+				if( ver.verificaLista().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Lista vacia, todavia no hay usuarios");
+				}else {
+					JOptionPane.showMessageDialog(null, ver.verificaLista());
+				}
+				
 				break;
 			case " Eliminar usuario":
+				
+				int id= Integer.parseInt( JOptionPane.showInputDialog("Ingrese ID de la persona a eliminar"));
+				
+				
+				if(ver.verificarEliminar(id)) {
+					JOptionPane.showMessageDialog(null, "Se elimino correctamente el usuario");
+					
+				} else {
+					JOptionPane.showMessageDialog(null, "Ocurrio un error, verifique que el id que esta eliminando exista");
+				}
 				
 				break;
 			case " Editar usuario":
 				
+				int idEdit= 0;
+				
+				do {
+					
+					try {
+					idEdit= Integer.parseInt(JOptionPane.showInputDialog("Ingrese el id del empleado a editar"));
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "Debe ingresar un numero");
+					}
+				
+				} while (idEdit<=0);
+				
+				try {
+					if (ver.verificaUsuario(idEdit).isEmpty()) {
+						
+					} else {
+						JOptionPane.showMessageDialog(null,"Usuario a editar: \n" +  ver.verificaUsuario(idEdit));
+					}
+				} catch (Exception e) {
+					
+				}
+				
+				if (ver.verificaEditar(idEdit)) {
+					JOptionPane.showMessageDialog(null, "Se edito al usuario con exito");
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al editar el usuario");
+				}
 				break;
 			case " Ver sponsors disponibles":
 				
@@ -134,7 +219,7 @@ public class Main {
 				
 				break;
 				
-			default: iniciarSesion(usuarios);
+			default:
 				break;
 			}
 			
@@ -182,8 +267,6 @@ public class Main {
 						,JOptionPane.QUESTION_MESSAGE ,null ,cajas, cajas[0]);
 				
 				int cantidad = Integer.parseInt(JOptionPane.showInputDialog("ingrese cantidad de productos:"));
-				
-				
 				
 				break;
 			case " Imprimir factura":
