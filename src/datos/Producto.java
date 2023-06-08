@@ -18,10 +18,6 @@ public class Producto {
 	private String categoria;
 	private int stock;
 
-	LinkedList<Producto> productos = new LinkedList<Producto>();
-	LinkedList<Producto> stockEnCorrientes = new LinkedList<Producto>();
-	LinkedList<Producto> stockEnBrasil = new LinkedList<Producto>();
-	LinkedList<Producto> stockEnGaona = new LinkedList<Producto>();
 	
 //conectar a bdd	
 	Conexion con = new Conexion();
@@ -104,106 +100,164 @@ public class Producto {
 
 
 //metodos
-	public String productosPorSucursal() {
-		int numSucursal = 0;
-		String lista="", mensaje="", acumulativo ="";
-		String[] sucursales = {"Corrientes","Brasil","Gaona"}; //opciones
+	
+	public LinkedList<Producto> listaProductos(int numDeposito) {
+		LinkedList<Producto> listaProductos = new LinkedList<Producto>();
+		Producto productoElegido = null; // producto a retornar;
 		
-		//pregunto de cual sucursal desea ver los productos
-		String sucursal = (String) JOptionPane.showInputDialog(
-				null, "Seleccione en cual sucursal se encuentra:","SPORTIVA"
-				,JOptionPane.QUESTION_MESSAGE ,null ,sucursales, sucursales[0]);
-		//igualo sucursal seleccionada con el numero id de cada sucursal
-		if (sucursal.equals("Corrientes")) {
-			numSucursal = 1;
-		}else if(sucursal.equals("Brasil")){
-			numSucursal = 2;
-		}else if(sucursal.equals("Gaona")){
-			numSucursal = 3;
-		}
-		//Me traigo solo nombre y stock de todos los productos.
-		String sql = "SELECT nombre, inventario.stock "
-				+ "FROM producto "
-				+ "INNER JOIN inventario "
-				+ "ON id_producto = inventario.fk_producto "
-				+ "WHERE inventario.fk_deposito = ?;";
-
-		String[] datos = new String[2]; 
-		try {
-			stmt = conexion.prepareStatement(sql);
-			stmt.setLong(1, numSucursal);
-			ResultSet result = stmt.executeQuery();
-			
-			while(result.next()) {
-				datos[0]= result.getString(1);//nombre
-				datos[1]= result.getString(2);//stock
-				
-			//Creo objeto Producto y guardo los datos de la bd en una linkedlist
-			//Constructor Producto = id, nombre, descripcion, marca, precio, categoria
-				Producto nuevoProducto = new Producto(0, datos[0], null, null, 0, null);
-				
-			//como stock no forma parte del constructor setteo el stock a cada producto 
-				nuevoProducto.setStock(Integer.parseInt(datos[1]));
-				
-			//Agrego los objetos creados a la lista productos
-				productos.add(nuevoProducto);
-	
-			}
-			//recorro con foreach la linkedlist recien creada	
-			for (Producto producto : productos) {
-				mensaje = "→ Producto: "+producto.getNombre()+" - Stock: "+producto.getStock()+"\n";
-				lista = "Hay "+productos.size()+" articulos en sucursal "+sucursal+"\n";
-				acumulativo += mensaje;
-			}
-		}catch(Exception excepcion){
-			JOptionPane.showMessageDialog(null, excepcion.getMessage());
-		}
-		return lista+acumulativo;
-	}
-	
-	public String stockPorProducto() {
-		int numSucursal = 0;
-		String mensaje="";
-		String[] sucursales = {"Corrientes","Brasil","Gaona"}; //Opciones
-
-		String sucursal = (String) JOptionPane.showInputDialog(
-				null, "Seleccione de cual sucursal quiere ver:","SPORTIVA"
-				,JOptionPane.QUESTION_MESSAGE ,null ,sucursales, sucursales[0]);
-		//igualo sucursal seleccionada con el numero id de cada sucursal
-		if (sucursal.equals("Corrientes")) {
-			numSucursal = 1;
-		}else if(sucursal.equals("Brasil")){
-			numSucursal = 2;
-		}else if(sucursal.equals("Gaona")){
-			numSucursal = 3;
-		}
-		//Me traigo datos de todos los productos.
-		String sql = "SELECT nombre, descripcion, marca, precio,"
+		String sql = "SELECT id_producto, nombre, descripcion, marca, precio, "
 				+ "inventario.stock, categoria.categoria "
 				+ "FROM producto "
 				+ "INNER JOIN inventario ON id_producto = inventario.fk_producto "
 				+ "INNER JOIN categoria ON id_categoria = fk_categoria "
-				+ "WHERE inventario.fk_deposito = ?;"; 
+				+ "WHERE inventario.fk_deposito = ? "; 
 
-		String[] datos = new String[6];
+		String[] datos = new String[7];
+		
 		try {
 			stmt = conexion.prepareStatement(sql);
-			stmt.setLong(1, numSucursal);
+			stmt.setLong(1, numDeposito);
 			ResultSet result = stmt.executeQuery();
+//			conexion.close();
+			
+			//Traigo datos de todos los productos.
+			while(result.next()) {
+				datos[0]= result.getString(1);//id
+				datos[1]= result.getString(2);//nombre
+				datos[2]= result.getString(3);//descripcion
+				datos[3]= result.getString(4);//marca
+				datos[4]= result.getString(5);//precio
+				datos[5]= result.getString(6);//stock
+				datos[6]= result.getString(7);//categoria
+				
+				productoElegido = new Producto(Integer.parseInt(datos[0]), datos[1],
+						datos[2], datos[3], Double.parseDouble(datos[4]), datos[6]);
+			//como stock no forma parte del constructor setteo el stock a cada producto 
+				productoElegido.setStock(Integer.parseInt(datos[5]));
+				
+				listaProductos.add(productoElegido);
+			}
+		}catch(Exception excepcion){
+			System.out.println("Error al seleccionar producto:\n"+excepcion.getMessage()+"\n");
+		}
+		return listaProductos;
+	}
+
+	
+	public String infoProducto( int sucursal) {
+		String mensaje = "";
+		LinkedList<Producto> menu = new LinkedList<Producto>(); //Lista para crear el menu de productos
+		Producto productoElegido = new Producto(0, "", "", "", 0, ""); //producto a retornar
+		
+		for (Producto producto : listaProductos(sucursal)) { //Obtengo lista de un metodo
+			menu.add(producto); //Guardo los productos en la lista de menu
+		}
+
+		//Creo un array con el tamaño de la lista de productos.
+		String[] aux = new String [menu.size()];
+		//Agrego al menu el nombre de cada producto de la sucursal elegida.
+		for (Producto producto : menu) {
+			aux[menu.indexOf(producto)]= producto.getNombre();
+		}
+		//muestro menu con todos los productos de la sucursal elegida.
+		String opcion = (String) JOptionPane.showInputDialog(null
+					, "Estos son los productos disponibles.\n"
+					+ "Seleccione uno:","SPORTIVA - SUCURSAL N°" + sucursal
+					, JOptionPane.QUESTION_MESSAGE ,null ,aux, aux[0]);
+		
+		for (Producto producto : menu) {
+		//igualo la opcion del producto elegido con el nombre de algun producto en la lista
+			if (opcion.equals(producto.getNombre())) {
+			//Guardo en el producto elegido todos sus atributos.
+				productoElegido.setId_producto(producto.getId_producto());
+				productoElegido.setNombre(producto.getNombre());
+				productoElegido.setDescripcion(producto.getDescripcion());
+				productoElegido.setMarca(producto.getMarca());
+				productoElegido.setPrecio(producto.getPrecio());
+				productoElegido.setCategoria(producto.getCategoria());
+				productoElegido.setStock(producto.getStock());
+			}
+			
+			mensaje = productoElegido.getNombre() +"\n"+ productoElegido.getDescripcion()+"\n"
+			+ "Marca: "+productoElegido.getMarca()+" - Precio: $"+productoElegido.getPrecio()+"\n"
+			+ "Stock: "+productoElegido.getStock()+" - Categoria: "+productoElegido.getCategoria();
+		}
+		return mensaje;
+	}
+
+	
+	public String productosPorSucursal(int sucursal) {
+		String lista = "", mensaje = "", acumulativo = ""; //Mensajes a retornar
+		String nombreSucursal = "";
+		//Paso de numero de sucursal a nombre de sucursal
+		if (sucursal == 1) {
+			nombreSucursal = "Corrientes";
+		} else if (sucursal == 2) {
+			nombreSucursal = "Brasil";
+		} else if (sucursal == 3) {
+			nombreSucursal = "Gaona";
+		}
+		LinkedList<Producto> productos = new LinkedList<Producto>();
+
+		//recorro con foreach la linkedlist recien creada	
+		for (Producto producto : listaProductos(sucursal)) { //Obtengo lista de un metodo
+			productos.add(producto); //Guardo los productos en la lista 
+
+			mensaje = "→ Producto: "+producto.getNombre()+" - Stock: "+producto.getStock()+"\n";
+			lista = "Hay "+productos.size()+" articulos en sucursal "+nombreSucursal+"\n";
+			
+			acumulativo += mensaje;
+		}
+		return lista + acumulativo;
+	}
+	
+	
+	public boolean restarStock(int cantidad, Vendedor vendedor) {
+		
+		//Resto del Stock la cantidad vendida en la ultima venta.
+		int nuevoStock = this.getStock()-cantidad; 
+		this.setStock(nuevoStock); //Setteo nuevo stock al objeto producto. 
+		
+		//Actualizo el stock en la bdd.
+		String sql = "UPDATE inventario SET stock = ? "
+				+ "WHERE fk_producto = ? "
+				+ "AND fk_deposito = ? ";
+		try {
+			stmt = conexion.prepareStatement(sql);
+			stmt.setLong(1, this.getStock());
+			stmt.setLong(2, this.getId_producto());
+			stmt.setLong(3, vendedor.getSucursal());
+			stmt.executeUpdate();
+//			conexion.close();
+			return true;
+				
+		}catch(Exception excepcion) {
+			System.out.println("Error al actualizar stock:\n"+ excepcion.getMessage()+"\n");
+			return false;
+		}
+	}
+
+	public String pedirProducto() {
+		LinkedList<Producto> productos = new LinkedList<Producto>();
+
+		//Me traigo datos de todos los productos.
+		String nombreProducto;
+		String opcion = "";
+		String sql = "SELECT p.nombre FROM producto p "
+				+ "INNER JOIN inventario i ON i.fk_producto = p.id_producto "
+				+ "WHERE i.fk_deposito = 1 "; 
+
+		try {
+			stmt = conexion.prepareStatement(sql);
+			ResultSet result = stmt.executeQuery();
+//			conexion.close();
 			
 			while(result.next()) {
-				datos[0]= result.getString(1);//nombre
-				datos[1]= result.getString(2);//descripcion
-				datos[2]= result.getString(3);//marca
-				datos[3]= result.getString(4);//precio
-				datos[4]= result.getString(5);//stock
-				datos[5]= result.getString(6);//categoria
-				Producto nuevoProducto = new Producto(0, datos[0], datos[1], datos[2]
-						, Double.parseDouble(datos[3]), datos[5]);
+				nombreProducto = result.getString(1);
+
+				Producto producto = new Producto(0, nombreProducto, "", "", 0, "");
 				
-				nuevoProducto.setStock(Integer.parseInt(datos[4]));
-				
-				productos.add(nuevoProducto);
+				productos.add(producto);
 			}
 			//Creo un array con el tamaño de la lista de productos.
 			String[] aux = new String[productos.size()];
@@ -211,77 +265,19 @@ public class Producto {
 			for (Producto producto : productos) {
 				aux[productos.indexOf(producto)]= producto.getNombre();
 			}
-			//muestro menu con todos los productos de la sucursal elegida.
-			String opcion = (String) JOptionPane.showInputDialog(
-					null ,"Seleccione el producto a vender:","SPORTIVA"
-					,JOptionPane.QUESTION_MESSAGE ,null ,aux, aux[0]);
+			//muestro menu con todos los productos
+			opcion = (String) JOptionPane.showInputDialog(null
+					, "Seleccione el producto a pedir: ","SPORTIVA"
+					, JOptionPane.QUESTION_MESSAGE ,null ,aux, aux[0]);
 			
-			for (Producto producto : productos) {
-			//igualo la opcion del producto elegido con el nombre de algun producto en la lista
-				if (opcion.equals(producto.getNombre())) {
-					
-					mensaje = producto.getNombre() +"\n"
-							+ producto.getDescripcion()+"\n"
-							+ "Marca: "+producto.getMarca()+" - Precio: $"+producto.getPrecio()+"\n"
-							+ "Stock: "+producto.getStock()+" - Categoria: "+producto.getCategoria();
-				}
-			}
+			return opcion;  //Devuelve el nombre de un producto.
+
 		}catch(Exception excepcion){
-			mensaje = excepcion.getMessage();
+			System.out.println("Error al mostrar productos:\n"+excepcion.getMessage()+"\n");
+			return "";
 		}
-		return mensaje;
 	}
 
-	public void obtenerIdPrecioStock () { //
-//		int idProducto = 0;
-//		double precioProducto = 0;
-//		int stockProducto = 0;
-//		int numSucursal = 0;
-//		String sql = "SELECT nombre, precio, inventario.stock"
-//				+ "FROM producto "
-//				+ "INNER JOIN inventario ON id_producto = inventario.fk_producto "
-//				+ "WHERE inventario.fk_deposito = ?;"; 
-//
-//		String[] datos = new String[3];
-//		try {
-//			stmt = conexion.prepareStatement(sql);
-//			stmt.setLong(1, numSucursal);
-//			ResultSet result = stmt.executeQuery();
-//			
-//			while(result.next()) {
-//				datos[0]= result.getString(1);//nombre
-//				datos[1]= result.getString(2);//precio
-//				datos[2]= result.getString(3);//stock
-//				Producto nuevoProducto = new Producto(0, datos[0], null, null
-//						, Double.parseDouble(datos[1]), null);
-//				stockEnCorrientes.add(nuevoProducto);
-//				nuevoProducto.setStock(Integer.parseInt(datos[2]));
-//			}
-//			
-//			String[] aux = new String[stockEnCorrientes.size()];
-//			for (Producto producto : stockEnCorrientes) {
-//										
-//				aux[stockEnCorrientes.indexOf(producto)]= producto.getNombre();
-//			}
-//			
-//			String prod = (String) JOptionPane.showInputDialog(
-//					null ,"Seleccione el producto a vender:","SPORTIVA"
-//					,JOptionPane.QUESTION_MESSAGE ,null ,aux, aux[0]);
-//			
-//			for (Producto producto : stockEnCorrientes) {
-//				if (prod.equals(producto.getNombre())) {
-//					
-//					idProducto = producto.getId_producto();
-//					precioProducto = producto.getPrecio();
-//					stockProducto = producto.getStock();
-//				}
-//			}
-//		}catch(Exception excepcion){
-//			JOptionPane.showMessageDialog(null, excepcion.getMessage());
-//		}
-	}
-
-	
 	
 	
 }

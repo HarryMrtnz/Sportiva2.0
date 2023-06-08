@@ -26,7 +26,6 @@ public class Sponsor {
         this.equipo = equipo;
     }
     
-    
     @Override
 	public String toString() {
 		return "\n\nid_sponsor: " + id_sponsor + "\nequipo: " + equipo;

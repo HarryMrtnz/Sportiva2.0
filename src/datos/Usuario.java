@@ -2,14 +2,11 @@ package datos;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.LinkedList;
 
-import javax.swing.JOptionPane;
 
 import interfaces.Conexion;
 
-public class Usuario {
+public abstract class Usuario {
 
 	private String nombre;
 	private String apellido;
@@ -38,7 +35,6 @@ public class Usuario {
 		this.clave = clave;
 		this.puesto = p;
 		this.sucursal = s;
-
 	}
 
 	// constructor para traer los datos de la BDD
@@ -150,7 +146,7 @@ public class Usuario {
 		if (dni.equals(this.getDni())) {
 			if (clave.equals(this.getClave()) ) {
 				System.out.println("Usuario "+this.nombre+" "+this.apellido +
-						" Ingreso correctamente.");
+						" Ingreso correctamente.\n");
 				return true;
 			} else {
 				return false;
