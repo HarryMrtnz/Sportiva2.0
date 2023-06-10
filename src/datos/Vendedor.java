@@ -37,8 +37,7 @@ public class Vendedor extends Usuario {
 	
 	@Override
 	public String toString() {
-		return "Vendedor [id_vendedor=" + id_vendedor + ", con=" + con + ", conexion="
-				+ conexion + ", stmt=" + stmt + "]";
+		return "Vendedor [id_vendedor=" + id_vendedor + "]";
 	}
 
 //Metodos
@@ -78,23 +77,6 @@ public class Vendedor extends Usuario {
 		return productoElegido;
 	}
 	
-	public boolean realizarVenta() {
-		
-		if (venta.guardarVenta()) {
-			if (venta.guardarDetalle()) {
-				if (venta.actualizarRecaudacion()) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	
 	public String verStock(int sucursal) {
 		return producto.infoProducto(sucursal);
 	}
@@ -110,46 +92,8 @@ public class Vendedor extends Usuario {
 	public LinkedList<Venta> verVentas() {
 		return venta.listaVentas();
 	}
-	
-	public String verRecaudacionCaja(int caja, int sucursal) {
 
-		//Pregunto y muestro resultado de la suma en caso de que sea mayor a 0.
-//		if (JOptionPane.showMessageDialog(null, "La caja N°" + caja +" de la sucursal " + nombreSucursal
-//				+ "\nha recaudado $" + this.caja.recaudacionSucursal(sucursal) ) > 0) {
-//			return true;
-//		} else {
-			return this.caja.recaudacionSucursal(sucursal);
-//		}
-	}
 	
-	public String verRecaudacionSucursal(int sucursal) {
-		String nombreSucursal = ""; 
-		if (sucursal == 1) {
-			nombreSucursal = "Corrientes";
-		} else if(sucursal == 2){
-			nombreSucursal = "Brasil";
-		} else if(sucursal == 3){
-			nombreSucursal = "Gaona";
-		}
-//		//Pregunto y muestro resultado de la suma en caso de que sea mayor a 0.
-//		if (JOptionPane.showMessageDialog(null, "La sucursal" + nombreSucursal 
-//				+ " ha recaudado $" + this.caja.recaudacionSucursal(sucursal) ) > 0) {
-//			return true;
-//		} else {
-			return this.caja.recaudacionSucursal(sucursal);
-//		}
-	}
-	
-	public String verRecaudacionTotal() {
-		
-//		//Pregunto y muestro resultado de la suma en caso de que sea mayor a 0.
-//		if (JOptionPane.showMessageDialog(null, "La empresa ha recaudado $"
-//				+ this.caja.recaudacionTotal())  > 0) {
-//			return true;
-//		} else {
-			return this.caja.recaudacionTotal();
-//		}
-	}
 
 	
 	

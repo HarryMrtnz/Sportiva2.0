@@ -109,14 +109,12 @@ public class Venta {
 	public String toString() {
 		return "Venta N°: " + id_venta + " - " + fecha.format(formato) + "\n"
 				+ "Producto: "+ nombreProducto+ " x" + cantidad + "Unidades.\n"
-				+ "Metodo de Pago: " + metodoPago + "\n"
 				+ "Total: $" + total+"\n";
 	}
 	//Metodos
 	public boolean guardarVenta() {
 
-		String sql ="INSERT INTO venta(fk_caja, total) VALUES (?,?)";
-//		String sql ="INSERT INTO venta(fk_caja) VALUES (?)"; // Probando solo guardar un int en fk_caja. NO ANDA
+		String sql ="INSERT INTO venta(fk_caja, total) VALUES (?,?) ";
 
 		try {
 			stmt = conexion.prepareStatement(sql);
@@ -152,13 +150,15 @@ public class Venta {
 	}
 	
 	public boolean guardarDetalle() {
-		String sql ="INSERT INTO detalle_venta(fk_producto, cantidad, fk_venta) "
-				+ "VALUES (?,?,?);";
+		int id = idVenta();  //Aplico metodo para obtener id_venta.
+		
+		String sql = "INSERT INTO detalle_venta(fk_producto, cantidad, fk_venta) "
+				+ "VALUES (?,?,?) ";
 		try {
 			stmt = conexion.prepareStatement(sql);
 			stmt.setInt(1, this.getProducto());
 			stmt.setInt(2, this.getCantidad());
-			stmt.setInt(3, this.idVenta() ); //Aplico metodo para obtener id_venta
+			stmt.setInt(3, id );
 			stmt.executeUpdate();
 //			conexion.close();
 			return true;
@@ -208,56 +208,93 @@ public class Venta {
 	}
 	
 	public boolean actualizarRecaudacion(){
-		int numSucursal = 0;
-		double total = 0;
-
-		//calcular Sucursal a travez de la id caja.
-		if (this.getCaja()> 0 && this.getCaja() < 5) {
-			numSucursal = 1;
-		} else if (this.getCaja()> 5 && this.getCaja() < 8){
-			numSucursal = 2;
-		} else if(this.getCaja()> 8  && this.getCaja() < 11) {
-			numSucursal = 3;
-		}
+		double recaudacion = 0;
+		int caja = this.getCaja();
 		
-		String sql1 = "SELECT recaudacion FROM caja "
-				+ "WHERE id_caja = ? "
-				+ "AND fk_sucursal = ? ";
+		recaudacion += this.getTotal();
+		
+		String sql = "UPDATE caja SET recaudacion = ? "
+				+ "WHERE id_caja = ? ";
 		try {
-			stmt = conexion.prepareStatement(sql1);
-			ResultSet result = stmt.executeQuery();
-			
-			stmt.setInt(1, this.getCaja());
-			stmt.setInt(2, numSucursal);
+			stmt = conexion.prepareStatement(sql);
+			stmt.setDouble(1, recaudacion);
+			stmt.setLong(2, caja);
 			stmt.executeUpdate();
 //			conexion.close();
 			
-			while(result.next()) {
-				total = result.getDouble(1);
-			}
+			System.out.println("Venta finalizada.\n");
+			return true;
 			
-			String sql2 = "UPDATE caja SET recaudacion = ? "
-					+ "WHERE id_caja = ? "
-					+ "AND fk_sucursal= ? ";
-			try {
-				stmt = conexion.prepareStatement(sql2);
-				stmt.setDouble(1, this.getTotal()+ total);
-				stmt.setInt(2, this.getCaja());
-				stmt.setInt(3, numSucursal);
-				stmt.executeUpdate();
-//				conexion.close();
-				System.out.println("Venta finalizada.\n");
-				return true;
-				
-			}catch(Exception excepcion){
-				System.out.println("Error al obtener total de venta:\n"+ excepcion.getMessage()+"\n");
-				return false;
-			}
 		}catch(Exception excepcion){
-			System.out.println("Error al actualizar recaudacion:\n"+ excepcion.getMessage()+"\n");
+			System.out.println("Error al obtener total de venta:\n"+ excepcion.getMessage()+"\n");
 			return false;
 		}
 	}
+	
+	public boolean realizarVenta() {
+		
+		if (this.guardarVenta()) {
+			if (this.guardarDetalle()) {
+				if (this.actualizarRecaudacion()) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	
+	public String factura(Vendedor vendedor, Producto producto, int cantidad, int caja, String metodoPago, LocalDate fecha) {
+		String mensaje, facturaIntro, facturaFin; //A retornar
+		String totalFormateado ; //Formateo a solo 2 decimales.
+
+		DateTimeFormatter formato = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy");
+		fecha.format(formato);
+		double subtotal, total = 0;
+		subtotal = producto.getPrecio()*cantidad;
+
+		System.out.println("Imprimiendo factura");
+		
+		facturaIntro = "SPORTIVA  -  SUCURSAL N°: "+ vendedor.getSucursal() +"\n"
+				+ "Caja N°"+ caja +"  -  " + fecha.format(formato) +"\n\n"
+				+ "_________  ← SPORTIVA →  _________\n"
+				+ "Producto: "+ producto.getNombre() +".\n"
+				+ "Precio unitario $"+ producto.getPrecio() +"\n"
+				+ "Cantidad: "+ cantidad +" unidad/es.\n"
+				+ "Subtotal: $"+ subtotal +"\n\n";
+
+		if (metodoPago.equals("Efectivo")) {
+			total = subtotal * 0.95; // 5%de descuento
+			totalFormateado = String.format("%.2f", total);
+			
+			mensaje = "Has recibo 5% de descuento por pago en Efectivo.\n"
+					+ "Total: $"+totalFormateado+".\n\n";
+
+		}else if(producto.getCategoria().equals("Calzado") //Categoria del producto = calzado
+			&& fecha.getDayOfWeek().name().equals("THURSDAY")){ //Dia de la semana = Jueves (THURSDAY)
+			total = total * 0.70; // 30% de descuento
+			totalFormateado = String.format("%.2f", total); //Formato de 2 decimales
+
+			mensaje = "Jueves de descuento.\n"
+					+ "Has recibo 30% de descuento por el producto calzado.\n"
+					+ "Total: $"+totalFormateado+".\n\n";
+		}else {
+			total = subtotal;
+			totalFormateado = String.format("%.2f", total); //Formato de 2 decimales
+
+			mensaje = "Total: $"+totalFormateado+".\n\n";
+		}
+		facturaFin = "Atendido por "+ vendedor.getApellido() +" "+ vendedor.getNombre() +".\n"
+				+ "_________  ← SPORTIVA →  _________" ;
+		
+		return facturaIntro + mensaje + facturaFin ;
+	}
+	
+	
 	
 }
 

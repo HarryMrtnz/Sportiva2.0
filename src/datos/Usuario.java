@@ -3,7 +3,6 @@ package datos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-
 import interfaces.Conexion;
 
 public abstract class Usuario {
@@ -19,9 +18,9 @@ public abstract class Usuario {
 	String id;
 	private boolean login;
 
+	//conectar a la bdd
 	Conexion con = new Conexion();
 	Connection conexion = con.conectar();
-
 	PreparedStatement stmt;
 
 	// constructor para crear un nuevo usuario
@@ -139,7 +138,8 @@ public abstract class Usuario {
 				+ ", email: " + email + "Telefono: " + telefono + ", clave: " + clave + ", puesto: " + puesto
 				+ ", sucursal: " + sucursal + "\n";
 	}
-
+		
+	
 	public boolean login(String dni, String clave) {
 
 		//Comparo dni y clave en la linkedList para iniciar sesion

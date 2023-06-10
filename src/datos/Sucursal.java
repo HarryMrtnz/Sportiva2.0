@@ -48,7 +48,7 @@ public class Sucursal {
 	
 //Metodos
 	
-	public int seleccionarSucursal() { //Usado en el menu Vendedor para ver productos de sucursales
+	public int seleccionarSucursal() { //Usado en el menu Vendedor para ver productos de sucursales; y recaudacion.
 	
 		int numSucursal = 0;
 		String[] sucursales = {"Corrientes", "Brasil", "Gaona"}; //Opciones sucursal

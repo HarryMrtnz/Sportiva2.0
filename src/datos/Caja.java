@@ -115,104 +115,77 @@ public class Caja {
 		return idCaja;
 	}
 	
-	public String recaudacionCaja(int caja, int sucursal) {
+	public String recaudacionCaja(int caja) {
 		double recaudacionCaja = 0;
-		String mensaje ="";
-
-		String nombreSucursal = ""; 
-		if (sucursal == 1) {
-			nombreSucursal = "Corrientes";
-		} else if(sucursal == 2){
-			nombreSucursal = "Brasil";
-		} else if(sucursal == 3){
-			nombreSucursal = "Gaona";
-		}
 		
 		String sql = "SELECT recaudacion FROM caja "
-				+ "WHERE id_caja = ? "
-				+ "AND fk_sucursal = ? ";
-		
+				+ "WHERE id_caja = ? ";
+
 		try {
 			stmt = conexion.prepareStatement(sql);
+			stmt.setLong(1, caja);
 			ResultSet result = stmt.executeQuery();
-			
-			stmt.setInt(1, caja);
-			stmt.setInt(2, sucursal);
-			stmt.executeUpdate();
 //			conexion.close();
-			
 			while(result.next()) {
+			//Recibo la suma total de la caja en la bdd, y la guardo en recaudacionCaja;
 				recaudacionCaja = result.getDouble(1);
 			}
 			
-			mensaje = "La caja N°" + caja +" de la sucursal" + nombreSucursal
-					+ "\nha recaudado $" + recaudacionCaja;
+			String numeroFormateado = String.format("%.2f", recaudacionCaja); //Formateo a solo 2 decimales.
+			return numeroFormateado;
+			
 		}catch(Exception excepcion){
 			System.out.println("Error al obtener recaudacion de la caja:\n"+ excepcion.getMessage()+"\n");
 			return "";
 		}
-		return mensaje;
 	}
 	
 	public String recaudacionSucursal(int sucursal) {
 		double recaudacionSucursal = 0;
-		String mensaje ="";
-
-		String nombreSucursal = ""; 
-		if (sucursal == 1) {
-			nombreSucursal = "Corrientes";
-		} else if(sucursal == 2){
-			nombreSucursal = "Brasil";
-		} else if(sucursal == 3){
-			nombreSucursal = "Gaona";
-		}
 		
 		String sql = "SELECT SUM(recaudacion) "
 				+ "FROM caja WHERE fk_sucursal = ? ";
 		
 		try {
 			stmt = conexion.prepareStatement(sql);
+			stmt.setLong(1, sucursal);
 			ResultSet result = stmt.executeQuery();
-			
-			stmt.setInt(1, sucursal);
-			stmt.executeUpdate();
 //			conexion.close();
 			
 			while(result.next()) {
 				recaudacionSucursal = result.getDouble(1);
 			}
+
+			String numeroFormateado = String.format("%.2f", recaudacionSucursal); //Formateo a solo 2 decimales.
+			return numeroFormateado;
 			
-			mensaje = "La sucursal" + nombreSucursal
-					+ "ha recaudado $" + recaudacionSucursal;
 		}catch(Exception excepcion){
 			System.out.println("Error al obtener recaudacion de la sucursal:\n"+ excepcion.getMessage()+"\n");
 			return "";
 		}
-		return mensaje;
 	}
 	
 	public String recaudacionTotal() {
 		double recaudacionTotal = 0;
-		String mensaje ="";
 
 		String sql = "SELECT SUM(recaudacion) FROM caja";
 		
 		try {
 			stmt = conexion.prepareStatement(sql);
 			ResultSet result = stmt.executeQuery();
-			stmt.executeUpdate();
+//			stmt.executeUpdate();
 //			conexion.close();
 			
 			while(result.next()) {
 				recaudacionTotal = result.getDouble(1);
 			}
+			String numeroFormateado = String.format("%.2f", recaudacionTotal); //Formateo a solo 2 decimales.
+			return numeroFormateado;
 			
-			mensaje = "La empresa ha recaudado $"+recaudacionTotal;
 		}catch(Exception excepcion){
 			System.out.println("Error al obtener recaudacion de la sucursal:\n"+excepcion.getMessage()+"\n");
-			return mensaje = "";
+			return "";
 		}
-		return mensaje;
 	}
 	
 	

@@ -100,7 +100,6 @@ public class Producto {
 
 
 //metodos
-	
 	public LinkedList<Producto> listaProductos(int numDeposito) {
 		LinkedList<Producto> listaProductos = new LinkedList<Producto>();
 		Producto productoElegido = null; // producto a retornar;

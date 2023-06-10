@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 
 import datos.Vendedor;
 import datos.Venta;
+import datos.Caja;
 import datos.Gerente;
 import datos.Producto;
 
@@ -14,6 +15,7 @@ public class Verifica {
 	
 //--- Hecho por Fran ------------------------------------------------------------
 	Gerente nuevousuario = new Gerente("","","","","","",0,0); 
+	
 	
   	public LinkedList<Gerente> verificaLista(){
 		
@@ -127,9 +129,9 @@ public class Verifica {
 												+ "Ingrese la clave de la nueva persona a agregar"));
 									}
 								} else {
-								usuario.setTelefono(JOptionPane.showInputDialog("Error al ingresar el telefono, "
-										+ "debe tener entre 8 y 14 caracteres numericos\n"
-										+ "Ingrese el telefono de la nueva persona a agregar"));
+									usuario.setTelefono(JOptionPane.showInputDialog("Error al ingresar el telefono, "
+											+ "debe tener entre 8 y 14 caracteres numericos\n"
+											+ "Ingrese el telefono de la nueva persona a agregar"));
 								}
 							} else {
 								usuario.setEmail(JOptionPane.showInputDialog("Error al ingresar el email, "
@@ -164,8 +166,11 @@ public class Verifica {
 	
 	Vendedor vendedor = new Vendedor ("Harry", "Martinez", "", "", "", "", 2, 1);
 	Producto producto = new Producto (0, "", "", "", 0, "");
+	Caja caja = new Caja (0, 0, 0);
 	Venta venta = new Venta(0, 0, null, 0);
-	LinkedList<Producto>productos;
+	LinkedList<Producto> productos;
+	
+	
 	
 	public String verProductos(int sucursal){
 		
@@ -191,16 +196,16 @@ public class Verifica {
 				subtotal = producto.getPrecio()*cantidad;
 			//Aplicar descuento en efectivo
 				if (metodoPago.equals("Efectivo")){
-					total = subtotal*0.95;// 5% de descuento 
-				}else {//Otra forma de pago no aplica descuento
+					total = subtotal*0.95;// 5% de descuento. 
+				}else {//Otra forma de pago no aplica descuento.
 					total = subtotal;
 				}
-			//Aplicar descuento en zapatillas los jueves
-				if (producto.getCategoria().equals("1") //1 = zapatillas
-					&& fecha.getDayOfWeek().equals("THURSDAY")){//Dia de la semana = Jueves (THURSDAY)
-
+			//Aplicar descuento en zapatillas los jueves.
+				if (producto.getCategoria().equals("Calzado") //Categoria del producto = calzado
+					&& fecha.getDayOfWeek().name().equals("THURSDAY")){//Dia de la semana = Jueves (THURSDAY)
 					total = total*0.70; // 30% de descuento
 				}
+
 				flag = 1;
 				venta.setCaja(caja);
 				venta.setCantidad(cantidad);
@@ -208,14 +213,13 @@ public class Verifica {
 				venta.setMetodoPago(metodoPago);
 				venta.setTotal(total);
 				
-				vendedor.realizarVenta();
+				venta.realizarVenta();
 				return true;
 
 			}else {
 				  cantidad = Integer.parseInt(JOptionPane.showInputDialog(
-						  	"No hay suficientes productos  a la venta\n"
-						  	+ "Solo hay "+producto.getStock()+" unidades\n"
-							+ "Intente un valor menor" ));
+						  	"Solo hay "+producto.getStock()+" unidades\n"
+							+ "Elige un numero entre 1 y "+producto.getStock()+" porfis." ));
 			}
 		}while(flag == 0);
 			return false;
@@ -233,7 +237,6 @@ public class Verifica {
 			if (!producto.getNombre().isEmpty()){
 				if (producto.getStock() > 0) {
 					flag = 1;
-					//vendedor.hacerPedido();
 					
 					return true;
 				}else {
@@ -247,17 +250,31 @@ public class Verifica {
 			return false;
 	}	
 	
-	public String recaudacionCaja(int caja, int sucursal) {
-		return vendedor.verRecaudacionCaja(caja, sucursal);
-
+	public boolean recaudacionCaja(int idCaja) {
+		if (caja.recaudacionCaja(idCaja).equals("0,00")) {
+			return false;
+		}else {
+			System.out.println("Imprimiendo recaudacion Caja N°"+idCaja+".\n");
+			return true;
+		}
 	}
 	
-	public String recaudacionSucursal(int sucursal) {
-		return vendedor.verRecaudacionSucursal(sucursal);
+	public boolean recaudacionSucursal(int sucursal) {
+		if (caja.recaudacionSucursal(sucursal).equals("0,00")) {
+			return false;
+		} else {
+			System.out.println("Imprimiendo recaudacion Sucurrsal N°"+sucursal+".\n");
+			return true;
+		}		
 	}
 	
-	public String recaudacionTotal() {
-		return vendedor.verRecaudacionTotal();
+	public boolean recaudacionTotal() {
+		if (caja.recaudacionTotal().equals("0,00")) {
+			return false;
+		} else {
+			System.out.println("Imprimiendo recaudacion total.\n");
+			return true;
+		} 
 	}
 	
 //--- Hecho por Kari ------------------------------------------------------------

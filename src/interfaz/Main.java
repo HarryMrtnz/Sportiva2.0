@@ -16,13 +16,14 @@ import datos.Producto;
 import datos.Sucursal;
 import datos.Usuario;
 import datos.Vendedor;
+import datos.Venta;
 import interfaces.Conexion;
 import negocio.Verifica;
 
 public class Main {
 		
 	public static void main(String[] args) {
-
+		
 		LinkedList<Usuario> usuarios = new LinkedList<Usuario>();
 		
 		//conectar a la bdd
@@ -315,18 +316,11 @@ public class Main {
 			
 		} while(!opcion.equals(" Salir" ));
 	}
-//Menu que debe aparecer si el usuario es Vendedor
 	
+//Menu que debe aparecer si el usuario es Vendedor
 	public static void menuVendedor(LinkedList<Usuario> usuarios) {
-		Vendedor vendedor = new Vendedor("Harry", "Martinez", "", "", "", "", 2, 1);
-		Producto producto = new Producto(0, "", "", "", 0, "");
-		Sucursal sucursal = new Sucursal(0, "", "");
-		        Caja caja = new Caja(0, 0, 0);
-
-		Verifica verifica = new Verifica();
-		
+	
 		String[] opciones = { " Realizar una venta",
-							  " Imprimir factura",
 							  " Revisar stock de un producto",
 							  " Ver stock de todos los productos",
 							  " Realizar pedido al deposito",
@@ -335,19 +329,40 @@ public class Main {
 							  " Salir" };
 		String opcion="";
 		
+		LocalDate fechaActual = LocalDate.now();
+		DateTimeFormatter formato = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy");
+		String fecha = fechaActual.format(formato);
+		int idCaja = 0;
+		String nombreSucursal = "";
+		
+		Verifica verifica = new Verifica();
+		Vendedor vendedor = new Vendedor("Harry", "Martinez", "", "", "", "", 2, 1);
+		Producto producto = new Producto(0, "", "", "", 0, "");
+		Sucursal sucursal = new Sucursal(0, "", "");
+		        Caja caja = new Caja(0, 0, 0);
+		      Venta venta = new Venta(0, 0, null, 0);
+		
+		if (vendedor.getSucursal() == 1) {
+			nombreSucursal = "Corrientes";
+		} else if(vendedor.getSucursal() == 2){
+			nombreSucursal = "Brasil";
+		} else if(vendedor.getSucursal() == 3){
+			nombreSucursal = "Gaona";
+		}	
+		
 		do {
 			String[] pagos = {"Tarjeta","Efectivo","Mercado Pago"};
 			
 			opcion = (String)JOptionPane.showInputDialog(null, "Seleccione la opcion deseada",
-				"SPORTIVA - MENU VENDEDOR",JOptionPane.QUESTION_MESSAGE,null, opciones,opciones[0]);
+				"SPORTIVA - MENU VENDEDOR",JOptionPane.QUESTION_MESSAGE,null, opciones, opciones[0]);
 			switch (opcion) {
 			case " Realizar una venta":
 				
-				int idCaja = caja.selecionarCaja(vendedor.getSucursal());
+				 idCaja = caja.selecionarCaja(vendedor.getSucursal());
 				
-				//Creo el producto seleccionado  
-				//Parametro vendedor para saber en que sucursal estoy
-				// Y muestrar solo productos disponibles de esa sucursal.
+		  /* - Creo el producto seleccionado.  
+		     - Parametro vendedor = para saber en que sucursal estoy
+			  	Y muestra solo productos disponibles de esa sucursal. */
 				Producto productoVendido = vendedor.seleccionarProducto(vendedor);
 				
 				int cantidad = Integer.parseInt(JOptionPane.showInputDialog("ingrese cantidad de productos:"));
@@ -358,19 +373,23 @@ public class Main {
 				
 				if (verifica.agregarVenta(productoVendido ,cantidad, idCaja, pago) //Completa tablas de venta
 					&&	(productoVendido.restarStock(cantidad, vendedor))) {//Actualiza stock del producto vendido
-					
 					System.out.println(vendedor.getNombre()+ " ha realizado una venta\n");
-					JOptionPane.showMessageDialog(null
+					
+					int respuesta = JOptionPane.showConfirmDialog(null
 							, "¡Venta realizada exitosamente!\n"
-							+ "Pero aun no somos ricos...");
+						    + "Pero aun no somos ricos...\n\n"
+						    + "¿Desea imprimir Factura?"); 
+					
+					if (respuesta == JOptionPane.YES_OPTION) {
+						JOptionPane.showMessageDialog(null
+						, venta.factura(vendedor, productoVendido, cantidad, idCaja, pago, fechaActual));
+					}
+					
 				} else {
-					System.out.println(vendedor.getNombre()+" ha fallado la venta.\n");
+					System.out.println(vendedor.getNombre()+ " ha fallado la venta.\n");
 					JOptionPane.showMessageDialog(null, "Venta fallida, hoy no se come");
 				}
 
-				break;
-			case " Imprimir factura":
-				
 				break;
 			case " Revisar stock de un producto":
 				//Pregunto de cual sucursal desea ver el producto, y guardo respuesta.
@@ -390,30 +409,18 @@ public class Main {
 				break;
 			case " Realizar pedido al deposito":
 				
-				String nombreSucursal = "";
-				LocalDate fechaActual = LocalDate.now();
-				DateTimeFormatter formato = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy");
-				String fecha = fechaActual.format(formato);
-				
-				if (vendedor.getSucursal() == 1) {
-					nombreSucursal = "Corrientes";
-				} else if(vendedor.getSucursal() == 2){
-					nombreSucursal = "Brasil";
-				} else if(vendedor.getSucursal() == 3){
-					nombreSucursal = "Gaona";
-				}	
 				producto.setNombre(vendedor.hacerPedido());
 				producto.setStock( Integer.parseInt(JOptionPane.showInputDialog(
 						"Ingrese cantidad del producto a pedir al deposito"))); 
 				
 				if (verifica.hacerPedidoDeposito(producto)) {
-					JOptionPane.showMessageDialog(null, "SPORTIVA  -  "+fecha+"\n"
+					JOptionPane.showMessageDialog(null, "SPORTIVA  -  " + fecha + "\n"
 							+ "_________________________________________\n"
 							+ "SOLICITUD DE PEDIDO ENVIADO.\n"
-							+ "DEPOSITO DESTINO: "+nombreSucursal+".\n\n"
-							+ "VENDEDOR: "+vendedor.getNombre()+" "+vendedor.getApellido()+"\n"
-							+ "→  PEDIDO: "+producto.getNombre()+ ".\n"
-							+ "→  x"+producto.getStock()+" UNIDADES.\n"
+							+ "DEPOSITO DESTINO: "+nombreSucursal + ".\n\n"
+							+ "VENDEDOR: " + vendedor.getNombre() + " " + vendedor.getApellido() + "\n"
+							+ "→  PEDIDO: " + producto.getNombre() + ".\n"
+							+ "→  x"+producto.getStock() + " UNIDADES.\n"
 							+ "_________________________________________\n"
 							+ "                       ←  Sportiva  →");
 				} else {
@@ -433,49 +440,65 @@ public class Main {
 				break;
 			case " Recaudaciones":
 				
-				String[] totales = { " 1 - De cajas en sucursal",
+				String[] recaudaciones = { " 1 - De cajas en sucursal",
 									 " 2 - Total de la sucursal",
 			      					 " 3 - Total",
 									 " 4 - Volver"};
-			    String total;
+			    String recaudacion;
 			
 			      do {
-			          total = (String) JOptionPane.showInputDialog(null
-			        		  , "Podras ver la recaudacion de las ventas realizadas.\n"
-			                  + "Elige cual recaudacion total deseas ver: "
-			        		  , "SPORTIVA - RECAUDACIONES",JOptionPane.QUESTION_MESSAGE,null, totales, totales[0]);
-			
-			          switch (total) {
+			          recaudacion = (String) JOptionPane.showInputDialog(null
+		        		  , "Podras ver la recaudacion de las ventas realizadas.\n"
+		                  + "Elige cual recaudacion total deseas ver: "
+		        		  , "SPORTIVA - RECAUDACIONES",JOptionPane.QUESTION_MESSAGE,null, recaudaciones, recaudaciones[0]);
+		
+			          switch (recaudacion) {
 
 			              case " 1 - De cajas en sucursal":
-			            	  int idCaja2 = caja.selecionarCaja(vendedor.getSucursal());
+
+			            	  idCaja = caja.selecionarCaja(vendedor.getSucursal());
 			            	  
-			            	  if(!verifica.recaudacionCaja(idCaja2, vendedor.getSucursal()).isEmpty()){
-			            		  System.out.println("Imprimiendo recaudacion de la caja "+idCaja2
-			            				  +" de la sucursal N°"+vendedor.getSucursal());
-			            	  } else {
-			            		  JOptionPane.showMessageDialog(null, "No se han hecho ventas, no hay recaudación.\n"
-			            		  		+ "Pongase a trabajar!!!!");
-			            	  }
+			            	  if (verifica.recaudacionCaja(idCaja)) {
+			            			JOptionPane.showMessageDialog(null
+			            			, "RECAUDACION SUCURSAL: " + nombreSucursal + "\n"
+			            			+ "CAJA N°" + idCaja + "\n"
+			            			+ " → TOTAL $" + caja.recaudacionCaja(idCaja));
+
+							} else {
+								 JOptionPane.showMessageDialog(null
+									, "RECAUDACION SUCURSAL: " + nombreSucursal + "\n"
+			            			+ "CAJA N°" + idCaja + "\n"
+			            			+ "→ No se han registrado ventas\n\n "
+			            			+ "→ Por favor, ¡Pongase a trabajar!)");
+							}
 			            	  
 			            	  break;
 			              case " 2 - Total de la sucursal":
 			            	  
-			            	  if(!verifica.recaudacionSucursal(vendedor.getSucursal()).isEmpty()){
-			            		  System.out.println("Imprimiendo recaudacion"
-			            				  +" de la sucursal N°"+vendedor.getSucursal());
+			            	  if(verifica.recaudacionSucursal(vendedor.getSucursal())){
+			            		  JOptionPane.showMessageDialog(null
+			            			, "RECAUDACION SUCURSAL: " + nombreSucursal + "\n"
+			            			+ " → TOTAL $" + caja.recaudacionSucursal(vendedor.getSucursal()));			            		  
 			            	  } else {
-			            		  JOptionPane.showMessageDialog(null, "No se han hecho ventas, no hay recaudación.\n"
-			            		  		+ "Pongase a trabajar!!!!");
+			            		  JOptionPane.showMessageDialog(null
+									, "RECAUDACION SUCURSAL: " + nombreSucursal + "\n"
+			            			+ "CAJA N°" + idCaja + "\n"
+			            			+ "→ No se han registrado ventas\n\n "
+			            			+ "→ Por favor, ¡Pongase a trabajar!)");
 			            	  }
 			            	  break;
 			              case " 3 - Total":
+			            	  
 					    
-			            	  if(!verifica.recaudacionTotal().isEmpty()){
-			            		  System.out.println("Imprimiendo recaudacion total de la empresa");
+			            	  if(verifica.recaudacionTotal()){
+			            		  JOptionPane.showMessageDialog(null
+			            			, "RECAUDACION GENERAL: \n"
+			            			+ " → TOTAL $" + caja.recaudacionTotal());	
 			            	  } else {
-			            		  JOptionPane.showMessageDialog(null, "No se han hecho ventas, no hay recaudación.\n"
-			            		  		+ "Pongase a trabajar!!!!");
+			            		  JOptionPane.showMessageDialog(null
+									, "RECAUDACION GENERAL: \n"
+			            			+ "→ No se han registrado ventas\n\n "
+			            			+ "→ Por favor, ¡Pongase a trabajar! ");
 			            	  }
 			            	  break;
 
@@ -483,7 +506,7 @@ public class Main {
 			            	  
 			                  break;
 			          }
-			      } while (!total.equals(" 4 - Volver"));
+			      } while (!recaudacion.equals(" 4 - Volver"));
 				break;
 				
 			default: 
@@ -506,7 +529,7 @@ public class Main {
 			
 			do {
 				opcion = (String)JOptionPane.showInputDialog(null, "Seleccione la opcion deseada",
-						"SPORTIVA - MENU ENCARGADO",JOptionPane.QUESTION_MESSAGE,null, opciones,opciones[0]);
+						"SPORTIVA - MENU ENCARGADO",JOptionPane.QUESTION_MESSAGE,null, opciones, opciones[0]);
 				
 				switch (opcion) {
 				case " Ver stock de todos los productos":
@@ -518,7 +541,7 @@ public class Main {
 				case " Agregar nuevo producto":
 					
 					break;
-				case  " Renovar stock de un producto":
+				case " Renovar stock de un producto":
 					
 					break;
 				case " Hacer pedido al proveedor":
